@@ -168,14 +168,11 @@ impl NBReader {
             match from_channel {
                 Ok(PipedChar::Char(c)) => self.buffer.push(c as char),
                 Ok(PipedChar::EOF) => self.eof = true,
-                // this is just from experience, e.g. "sleep 5" returns the other error which
-                // most probably means that there is no stdout stream at all -> send EOF
-                // this only happens on Linux, not on OSX
-                Err(PipeError::IO(ref err)) if err.kind() == io::ErrorKind::Other => {
-                    self.eof = true
+                Err(PipeError::IO(ref err)) => {
+                    // For an explanation of why we use `raw_os_error` see:
+                    // https://github.com/zhiburt/ptyprocess/commit/df003c8e3ff326f7d17bc723bc7c27c50495bb62
+                    self.eof = err.raw_os_error() == Some(5)
                 }
-                // discard other errors
-                Err(_) => {}
             }
         }
         Ok(())
