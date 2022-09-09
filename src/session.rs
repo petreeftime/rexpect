@@ -515,7 +515,7 @@ mod tests {
             let mut p = spawn("cat", Some(1000)).expect("cannot run cat");
             p.send_line("Hi")?;
             match p.exp_any(vec![ReadUntil::NBytes(3), ReadUntil::String("Hi".to_string())]) {
-                Ok(s) => assert_eq!(("".to_string(), "Hi\r".to_string()), s),
+                Ok(s) => assert_eq!(("".to_string(), "Hi".to_string()), s),
                 Err(e) => assert!(false, "got error: {}", e),
             }
             Ok(())

@@ -93,7 +93,13 @@ pub fn find(needle: &ReadUntil, buffer: &str, eof: bool) -> Option<(usize, usize
             // Filter matching needles
             .filter_map(|any| find(any, buffer, eof))
             // Return the left-most match
-            .min_by_key(|(a, _)| a.clone()),
+            .min_by(|(start1, end1), (start2, end2)| {
+                if start1 == start2 {
+                    end1.cmp(end2)
+                } else {
+                    start1.cmp(start2)
+                }
+            }),
     }
 }
 
@@ -349,6 +355,21 @@ mod tests {
             .expect("finding string");
 
         assert_eq!(("zero ".to_string(), "one".to_string()), result);
+    }
+
+    #[test]
+    fn test_any_with_same_start_different_length() {
+        let f = io::Cursor::new("hi hello");
+        let mut r = NBReader::new(f, None);
+
+        let result = r
+            .read_until(&ReadUntil::Any(vec![
+                ReadUntil::String("hello".to_string()),
+                ReadUntil::String("hell".to_string()),
+            ]))
+            .expect("finding string");
+
+        assert_eq!(("hi ".to_string(), "hell".to_string()), result);
     }
 
     #[test]
