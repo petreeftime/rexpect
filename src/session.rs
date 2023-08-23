@@ -380,9 +380,8 @@ pub fn spawn_bash(timeout: Option<u64>) -> Result<PtyReplSession, Error> {
     let mut rcfile = tempfile::NamedTempFile::new()?;
     let _ = rcfile.write(
         b"include () { [[ -f \"$1\" ]] && source \"$1\"; }\n\
-                  include /etc/bash.bashrc\n\
-                  include ~/.bashrc\n\
-                  PS1=\"~~~~\"\n\
+                  bind 'set enable-bracketed-paste off'\n
+                  export PS1=\"~~~~\"\n\
                   unset PROMPT_COMMAND\n",
     )?;
     let mut c = Command::new("bash");
